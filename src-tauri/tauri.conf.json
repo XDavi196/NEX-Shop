@@ -3,21 +3,15 @@
   "productName": "NEX Shop",
   "version": "0.2.0",
   "identifier": "com.nex.shop",
-  "build": {
-    "beforeBuildCommand": "pnpm build",
-    "beforeDevCommand": "pnpm dev -- --host 0.0.0.0",
-    "devUrl": "http://localhost:5173",
-    "frontendDist": "../dist"
-  },
+  "build": {"beforeBuildCommand": "pnpm build", "beforeDevCommand": "pnpm dev -- --host 0.0.0.0", "devUrl": "http://localhost:5173", "frontendDist": "../dist"},
   "app": {
     "windows": [{"title": "NEX Shop", "width": 1200, "height": 800, "minWidth": 360, "minHeight": 600}],
-    "security": {
-      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: asset: http://asset.localhost; connect-src ipc: http://ipc.localhost https://api.github.com"
-    }
+    "security": {"csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: asset: http://asset.localhost; connect-src ipc: http://ipc.localhost https://api.github.com"}
   },
   "bundle": {
     "active": true,
     "targets": ["nsis"],
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.ico"],
     "shortDescription": "NEX Shop: busca de projetos públicos no GitHub"
   }
 }
