@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm install --frozen-lockfile
       - run: pnpm test
       - run: pnpm build
 
@@ -35,7 +35,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - uses: dtolnay/rust-toolchain@stable
-      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm tauri icon src-tauri/icons/app-icon.svg
       - run: pnpm tauri build --bundles nsis
       - name: Name the installer
         shell: pwsh
@@ -66,7 +67,7 @@ jobs:
           java-version: 21
       - uses: android-actions/setup-android@v3
       - run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
-      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm exec cap add android
       - run: pnpm exec cap sync android
@@ -75,7 +76,7 @@ jobs:
         run: cp android/app/build/outputs/apk/debug/app-debug.apk NEX-Shop-Android-debug.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: android-apk
+          name: android-release-name
           path: NEX-Shop-Android-debug.apk
           if-no-files-found: error
 
@@ -102,4 +103,4 @@ jobs:
             - Confira a origem e as permissões do aplicativo antes de instalar.
           files: |
             release-assets/windows-installer/NEX-Shop-Setup.exe
-            release-assets/android-apk/NEX-Shop-Android-debug.apk
+            release-assets/android-release-name/NEX-Shop-Android-debug.apk
