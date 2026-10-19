@@ -38,6 +38,7 @@ jobs:
         shell: pwsh
         run: |
           $installer = Get-ChildItem src-tauri/target/release/bundle/nsis/*.exe | Select-Object -First 1
+          if (-not $installer) { throw 'Tauri did not produce an NSIS installer.' }
           Copy-Item $installer.FullName NEX-Shop-Setup.exe
       - uses: actions/upload-artifact@v4
         with:
@@ -84,19 +85,25 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: release-assets
-      - name: Publish release with both installers
+      - name: Publish preview with verified builds
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v0.2.0
-          name: NEX Shop v0.2.0
-          target_commitish: main
+          name: NEX Shop v0.2.0 — Prévia Windows e Android
+          target_commitish: ${{ github.sha }}
           prerelease: true
           generate_release_notes: true
           body: |
-            Builds de teste da NEX Shop para Windows e Android.
+            Prévia de desenvolvimento da NEX Shop compilada a partir do commit executado neste workflow.
 
-            - Windows: instalador NSIS não assinado.
-            - Android: APK debug, sem assinatura para publicação na Play Store.
+            ## Artefatos
+            - `NEX-Shop-Setup.exe`: instalador NSIS Windows, sem assinatura digital.
+            - `NEX-Shop-Android-debug.apk`: APK de depuração, sem assinatura para publicação na Play Store.
+
+            ## Escopo e limitações
+            Esta versão pesquisa repositórios e releases públicos do GitHub e GitLab e abre os links oficiais no navegador. Ela não gerencia downloads nem instala, atualiza, repara ou desinstala aplicativos. Consulte o README para as limitações completas.
+
+            Use os artefatos de prévia por sua conta e confirme a origem antes de instalar.
           files: |
             release-assets/windows-installer/NEX-Shop-Setup.exe
             release-assets/android-apk/NEX-Shop-Android-debug.apk
