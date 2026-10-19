@@ -1,8 +1,20 @@
-# NEX Shop
+<p align="center">
+  <img src="src-tauri/icons/app-icon.svg" width="112" alt="Logo da NEX Shop">
+</p>
+
+<h1 align="center">NEX Shop</h1>
+
+<p align="center">Descubra projetos públicos e consulte releases oficiais do GitHub e GitLab.</p>
 
 Loja independente para descobrir projetos de homebrew, emuladores e ports/recomps publicados em repositórios e releases públicos do GitHub e do GitLab. A consulta do catálogo público não exige conta nem token pessoal.
 
 > **Prévia de desenvolvimento.** Esta versão permite pesquisar projetos, consultar informações e abrir as páginas oficiais de releases. Ainda não gerencia downloads nem instalações. Consulte as [limitações](#limitações-conhecidas) antes de usar.
+
+## Amostra da loja
+
+![Amostra visual ilustrativa da home da NEX Shop, com catálogo, categorias e projetos](docs/media/home-preview.svg)
+
+A home reúne o catálogo inicial e atalhos para consultar as versões nas fontes oficiais. A imagem é uma amostra visual da interface; os dados apresentados no app são carregados do catálogo e das APIs públicas.
 
 ## Recursos disponíveis
 
