@@ -1,52 +1,80 @@
 # NEX Shop
 
-Loja independente para descobrir projetos de jogos usando a API REST pública do GitHub. A pesquisa não exige conta nem token pessoal.
+Loja independente para descobrir projetos de homebrew, emuladores e ports/recomps publicados em repositórios e releases públicos do GitHub e do GitLab. A consulta do catálogo público não exige conta nem token pessoal.
+
+> **Prévia de desenvolvimento.** Esta versão permite pesquisar projetos, consultar informações e abrir as páginas oficiais de releases. Ainda não gerencia downloads nem instalações. Consulte as [limitações](#limitações-conhecidas) antes de usar.
+
+## Recursos disponíveis
+
+- Pesquisa nas APIs REST públicas oficiais do GitHub e do GitLab.
+- Categorias de busca: homebrews, emuladores e ports/recomps.
+- Catálogo inicial com cinco emuladores conferidos nos repositórios oficiais em 19/10/2026.
+- Inclusão local de repositórios GitHub e GitLab por URL.
+- Pesquisa paginada, detalhes do projeto, licença declarada e atividade recente quando informadas pela API.
+- Consulta de até dez releases por projeto, notas, indicação de pré-lançamento e links oficiais.
+- Cache temporário em memória e mensagens para falhas de rede, projetos ausentes e limites de API.
+- Validação de links HTTPS e de caminhos de ativos hospedados na plataforma correspondente.
+
+## Limitações conhecidas
+
+- O catálogo inicial contém cinco emuladores; ainda não há uma seleção curada de homebrews e ports/recomps.
+- A busca por termos não valida automaticamente categoria, compatibilidade, licença, segurança ou prontidão do projeto.
+- Repositórios adicionados pelo usuário ficam no armazenamento local do navegador e não passam por curadoria da NEX.
+- Confira requisitos, licença e origem do projeto antes de baixar. A aplicação abre links oficiais no navegador; não faz o download do arquivo.
+- Para GitLab, ativos diretos são exibidos somente quando hospedados em `gitlab.com`; ativos externos não são tratados como downloads compatíveis.
+- Ainda não há download gerenciado, retomada/cancelamento, biblioteca instalada, instalação, atualização, reparo ou desinstalação.
+- Ainda não há catálogo editável validado, suporte a GitLab self-managed, SteamGridDB, ScreenScraper, preferências de temas/música ou instalação assistida de APK.
+- O aplicativo não instala arquivos em silêncio. Não considere um link ou ativo verificado como garantia de segurança.
+
+## Builds de prévia
+
+As releases de prévia podem conter instalador Windows NSIS e APK Android de depuração, conforme os builds aprovados da versão. O instalador Windows não é assinado digitalmente; o APK debug não está assinado para publicação na Play Store. Use somente artefatos anexados à página oficial de [releases](https://github.com/XDavi196/NEX-Shop/releases) e confira as notas de cada versão.
 
 ## Desenvolvimento
 
 Requer Node.js 22 ou superior e pnpm 10 ou superior.
 
 ```sh
-pnpm install
+pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Validar: `pnpm test`. Build web: `pnpm build`.
-
-## Builds para Windows e Android
-
-No GitHub, abra **Actions → Build and release NEX Shop → Run workflow**. O fluxo roda os testes e gera os dois pacotes em runners separados. A release de pré-lançamento `v0.2.0` só é publicada quando ambos os builds terminam com sucesso. Os arquivos anexados são `NEX-Shop-Setup.exe` (instalador NSIS) e `NEX-Shop-Android-debug.apk`.
-
-Esses pacotes são builds de teste: o instalador Windows não tem assinatura digital e o APK de depuração não está assinado para publicação na Play Store. Revise a origem do projeto antes de instalar.
-
-### Android local
-
-Instale Android Studio com Android SDK Platform 35, Build Tools 35 e JDK 21. Com Node.js e pnpm configurados:
+Verificações disponíveis no projeto:
 
 ```sh
-pnpm install
+pnpm test
+pnpm build
+```
+
+## Build Windows
+
+Requer Rust stable, Visual Studio C++ Build Tools e WebView2 Runtime.
+
+```sh
+pnpm install --frozen-lockfile
+pnpm tauri build --bundles nsis
+```
+
+O instalador NSIS é gerado em `src-tauri/target/release/bundle/nsis/`.
+
+## Build Android
+
+Requer Android Studio/SDK (Platform 35 e Build Tools 35), JDK 21, Node.js e pnpm.
+
+```sh
+pnpm install --frozen-lockfile
 pnpm build
 pnpm exec cap add android
 pnpm exec cap sync android
 cd android
-./gradlew assembleDebug
+./gradlew.bat assembleDebug
 ```
 
-No Windows, use `gradlew.bat assembleDebug`. O APK fica em `android/app/build/outputs/apk/debug/app-debug.apk`.
+No PowerShell, execute `gradlew.bat assembleDebug`. O APK debug é gerado em `android/app/build/outputs/apk/debug/app-debug.apk`. A instalação de APK depende da confirmação e das configurações do Android.
 
-### Windows local
+## Fontes de dados e privacidade
 
-Instale Rust stable, Visual Studio C++ Build Tools e WebView2 Runtime. Depois:
+A NEX Shop consulta `https://api.github.com` e `https://gitlab.com/api/v4` sem credenciais. Não solicita senha nem token pessoal e não recebe mensagens ou dados de conta. Links de ativos são validados para HTTPS e para caminhos de release da plataforma correspondente.
 
-```sh
-pnpm install
-pnpm tauri build --bundles nsis
-```
+O NEX 2 Frontend é um projeto separado e funciona sem a NEX Shop. Consulte o [repositório](https://github.com/XDavi196/NEX-2-Frontend) para os recursos e limites próprios dele.
 
-O instalador fica em `src-tauri/target/release/bundle/nsis/`.
-
-## Integração GitHub
-
-A interface converte os resultados JSON da API em cartões e detalhes clicáveis. Combina texto com categorias, aplica debounce de 450 ms, paginação, cache de 5 minutos e tratamento de rede/limite. Downloads só são listados para arquivos anexados a releases oficiais e com URL validada. Compatibilidade de sistema e arquitetura não é inferida; confira os requisitos declarados pelo autor. A NEX Shop não executa arquivos baixados.
-
-A base do NEX 2 Frontend ainda não está neste repositório. Este projeto não cria nem publica um APK para o NEX 2.
