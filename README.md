@@ -6,12 +6,13 @@ Aplicativo independente para descobrir projetos de jogos em repositórios e rele
 
 - Pesquisa de projetos públicos nas APIs REST oficiais do GitHub e GitLab.
 - Categorias de busca: homebrews, emuladores e ports/recomps.
+- Catálogo inicial com cinco projetos de emulação conferidos nos repositórios oficiais em 19/10/2026; repositórios GitHub e GitLab podem ser adicionados localmente por URL.
 - Resultados paginados, detalhes do projeto, licença declarada e atividade recente quando a API informa esses dados.
 - Até dez releases por projeto, notas da versão, indicação de pré-lançamento e links para releases e ativos publicados nos domínios oficiais.
 - Cache temporário em memória e mensagens para falha de rede, projeto ausente e limites de API.
 - Os arquivos abrem no navegador; a NEX Shop não instala nem executa downloads.
 
-**Limitações:** as categorias ainda funcionam como termos de busca das plataformas, não como catálogo curado e validado pela NEX. A presença de um projeto nos resultados não confirma sua categoria, compatibilidade, licença, segurança ou prontidão para uso. Verifique os requisitos e a origem antes de baixar. O suporte a release do GitLab mostra apenas links diretos hospedados no domínio gitlab.com; links externos não são apresentados como ativos para download.
+**Limitações:** o catálogo inicial cobre cinco emuladores; ainda não há uma seleção curada de homebrews e ports/recomps. A busca pública continua baseada em termos das plataformas e não valida automaticamente categoria, compatibilidade, licença, segurança ou prontidão. Projetos adicionados pelo usuário ficam no armazenamento local do navegador e não são validados pela NEX. Confira os requisitos e a origem antes de baixar. O suporte a release do GitLab mostra apenas links diretos hospedados em gitlab.com; links externos não são apresentados como ativos para download.
 
 Ainda não estão implementados download gerenciado, instalação/atualização/reparo/desinstalação, biblioteca instalada, catálogo editável validado, fornecedor GitLab self-managed, SteamGridDB, ScreenScraper, preferências de temas/música ou instalação assistida de APK. O repositório NEX 2 Frontend é separado; consulte o README dele para o estado atual.
 

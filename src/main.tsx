@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ApiError, type Category, type ProviderId, type Release, type Repo, formatDate, formatSize, validReleaseUrl } from './github';
 import { providerOptions, providers } from './providers';
+import { curatedCatalog, parseOfficialProjectUrl, type CatalogEntry } from './catalog';
 import './style.css';
 
 const categories: { id: Category; name: string }[] = [
@@ -12,6 +13,16 @@ const categories: { id: Category; name: string }[] = [
 ];
 
 function App() {
+  const [view, setView] = useState<'catalog' | 'search'>('catalog');
+  const [manualUrl, setManualUrl] = useState('');
+  const [manualCategory, setManualCategory] = useState<Category>('homebrew');
+  const [manualError, setManualError] = useState('');
+  const [userEntries, setUserEntries] = useState<CatalogEntry[]>(() => {
+    try {
+      const saved: unknown = JSON.parse(localStorage.getItem('nex-shop-user-catalog') || '[]');
+      return Array.isArray(saved) ? saved.filter((item): item is CatalogEntry => item && typeof item.id === 'string' && typeof item.project === 'string' && (item.provider === 'github' || item.provider === 'gitlab')) : [];
+    } catch { return []; }
+  });
   const [query, setQuery] = useState('');
   const [term, setTerm] = useState('');
   const [category, setCategory] = useState<Category>('all');
@@ -26,11 +37,13 @@ function App() {
   const [releases, setReleases] = useState<Release[]>([]);
 
   useEffect(() => {
+    if (view !== 'search') return;
     const timer = setTimeout(() => setTerm(query), 450);
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, view]);
 
   useEffect(() => {
+    if (view !== 'search') return;
     const controller = new AbortController();
     const provider = providers[providerId];
     setBusy(true);
@@ -49,10 +62,14 @@ function App() {
         if (!controller.signal.aborted) setBusy(false);
       });
     return () => controller.abort();
-  }, [term, category, page, providerId, refreshCount]);
+  }, [term, category, page, providerId, refreshCount, view]);
 
-  async function openProject(fullName: string) {
-    const provider = providers[providerId];
+  useEffect(() => {
+    try { localStorage.setItem('nex-shop-user-catalog', JSON.stringify(userEntries)); } catch { /* Storage may be unavailable in private mode. */ }
+  }, [userEntries]);
+
+  async function openProject(fullName: string, source: ProviderId = providerId) {
+    const provider = providers[source];
     try {
       setError(null);
       const [details, versions] = await Promise.all([
@@ -73,6 +90,27 @@ function App() {
     setReleases([]);
   }
 
+  function addManualProject() {
+    const parsed = parseOfficialProjectUrl(manualUrl);
+    if (!parsed) {
+      setManualError('Use a URL HTTPS de um repositório oficial no GitHub ou GitLab.');
+      return;
+    }
+    if ([...curatedCatalog, ...userEntries].some(item => item.provider === parsed.provider && item.project.toLowerCase() === parsed.project.toLowerCase())) {
+      setManualError('Este projeto já está no catálogo.');
+      return;
+    }
+    const projectParts = parsed.project.split('/');
+    const projectName = projectParts[projectParts.length - 1] || parsed.project;
+    setUserEntries(current => [...current, {
+      id: `${parsed.provider}:${parsed.project}`, name: projectName, provider: parsed.provider, project: parsed.project,
+      category: manualCategory === 'all' ? 'homebrew' : manualCategory, targets: [],
+      note: 'Adicionado por você. Confira a origem, os requisitos e a compatibilidade antes de baixar.', verifiedAt: new Date().toISOString().slice(0, 10),
+    }]);
+    setManualUrl('');
+    setManualError('');
+  }
+
   return (
     <main className="shell">
       <header>
@@ -83,6 +121,46 @@ function App() {
       <h1>Projetos para <em>jogar e criar.</em></h1>
       <p>Consulte projetos e releases públicos nas plataformas oficiais.</p>
 
+      <div className="view-switch" role="group" aria-label="Modo de navegação">
+        <button type="button" className={view === 'catalog' ? 'sel' : ''} aria-pressed={view === 'catalog'} onClick={() => { setView('catalog'); setRepo(null); }}>Catálogo</button>
+        <button type="button" className={view === 'search' ? 'sel' : ''} aria-pressed={view === 'search'} onClick={() => { setView('search'); setRepo(null); }}>Buscar em plataformas</button>
+      </div>
+
+      {view === 'catalog' && !repo && (
+        <>
+          <nav aria-label="Categorias do catálogo">
+            {categories.map(item => <button key={item.id} type="button" className={category === item.id ? 'sel' : ''} aria-pressed={category === item.id} onClick={() => setCategory(item.id)}>{item.name}</button>)}
+          </nav>
+          <input aria-label="Filtrar catálogo" value={query} onChange={event => setQuery(event.target.value)} placeholder="Filtrar projetos do catálogo…" />
+          <p className="catalog-disclaimer">Projetos selecionados manualmente. A data de verificação registra a conferência do repositório; confirme os detalhes da release no provedor.</p>
+          <section className="grid" aria-label="Projetos do catálogo">
+            {[...curatedCatalog, ...userEntries]
+              .filter(item => category === 'all' || item.category === category)
+              .filter(item => `${item.name} ${item.project} ${item.note}`.toLowerCase().includes(query.trim().toLowerCase()))
+              .map(item => (
+                <article key={item.id}>
+                  <small>{categories.find(entry => entry.id === item.category)?.name} · {item.provider === 'github' ? 'GitHub' : 'GitLab'} · Verificado {formatDate(item.verifiedAt)}</small>
+                  <h2>{item.name}</h2>
+                  <p>{item.note}</p>
+                  {item.targets.length > 0 && <p>Plataformas declaradas: {item.targets.join(', ')}</p>}
+                  <button type="button" onClick={() => { setView('search'); setProviderId(item.provider); void openProject(item.project, item.provider); }}>Ver versões oficiais</button>
+                  {' '}<a href={`https://${item.provider === 'github' ? 'github.com' : 'gitlab.com'}/${item.project}`} target="_blank" rel="noopener noreferrer">Repositório oficial ↗</a>
+                  {item.id.startsWith('github:') || item.id.startsWith('gitlab:') ? <button type="button" onClick={() => setUserEntries(current => current.filter(entry => entry.id !== item.id))}>Remover</button> : null}
+                </article>
+              ))}
+          </section>
+          <section className="manual-entry" aria-labelledby="manual-entry-title">
+            <h2 id="manual-entry-title">Adicionar repositório</h2>
+            <p>Somente URLs oficiais HTTPS do GitHub ou GitLab.com. A NEX não valida a segurança do conteúdo.</p>
+            <label>URL do projeto <input value={manualUrl} onChange={event => setManualUrl(event.target.value)} placeholder="https://github.com/organizacao/projeto" /></label>
+            <label>Categoria <select value={manualCategory} onChange={event => setManualCategory(event.target.value as Category)}><option value="homebrew">Homebrew</option><option value="emulators">Emulador</option><option value="ports">Port ou recomp</option></select></label>
+            <button type="button" onClick={addManualProject}>Adicionar ao catálogo local</button>
+            {manualError && <p role="alert" className="error-text">{manualError}</p>}
+          </section>
+        </>
+      )}
+
+      {view === 'search' && <>
       <div className="provider-switch" role="group" aria-label="Fonte de projetos">
         {providerOptions.map(option => (
           <button
@@ -160,7 +238,7 @@ function App() {
                   <pre className="release-notes">{release.body}</pre>
                 </details>
               )}
-              {release.assets.filter(asset => validReleaseUrl(asset.browser_download_url, providerId)).map(asset => (
+              {release.assets.filter(asset => validReleaseUrl(asset.browser_download_url, repo.provider ?? providerId)).map(asset => (
                 <p key={asset.browser_download_url}>
                   <a href={asset.browser_download_url} target="_blank" rel="noopener noreferrer">
                     Baixar {asset.name} {asset.size > 0 && '(' + formatSize(asset.size) + ')'} ↗
@@ -197,6 +275,7 @@ function App() {
           </footer>
         </>
       )}
+      </>}
     </main>
   );
 }
