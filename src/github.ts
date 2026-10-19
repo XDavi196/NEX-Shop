@@ -1,13 +1,18 @@
-export type Category = 'all'|'emulators'|'ports'|'homebrew'|'opensource'|'tools'|'launchers'|'android'|'windows';
-export type Repo = { id:number; name:string; full_name:string; html_url:string; description:string|null; owner:{login:string;html_url:string}; language:string|null; stargazers_count:number; updated_at:string; default_branch:string; topics?:string[]; license?:{spdx_id:string|null;name:string;url:string|null}|null; forks_count:number; open_issues_count:number; created_at:string; homepage:string|null; archived:boolean; disabled:boolean; };
+export type Category = 'all'|'emulators'|'ports'|'homebrew';
+export type ProviderId = 'github'|'gitlab';
+export type Repo = { id:number; name:string; full_name:string; html_url:string; description:string|null; owner:{login:string;html_url:string}; language:string|null; stargazers_count:number; updated_at:string; default_branch:string; topics?:string[]; license?:{spdx_id:string|null;name:string;url:string|null}|null; forks_count:number; open_issues_count:number; created_at:string; homepage:string|null; archived:boolean; disabled:boolean; provider?:ProviderId; };
 export type ReleaseAsset = {name:string;size:number;browser_download_url:string;content_type:string;download_count:number};
 export type Release = {tag_name:string;name:string|null;html_url:string;published_at:string|null;body:string|null;draft:boolean;prerelease:boolean;assets:ReleaseAsset[]};
 export type SearchPage = {items:Repo[];total_count:number;incomplete_results:boolean};
 const API='https://api.github.com';
 const cache = new Map<string,{until:number;value:unknown}>();
 const TTL=5*60_000;
-const categoryTerms:Record<Category,string>={all:'',emulators:'emulator',ports:'game-port',homebrew:'homebrew',opensource:'open-source game',tools:'game tools',launchers:'game launcher',android:'android',windows:'windows'};
-export class GitHubError extends Error { constructor(message:string, public status?:number, public retryAt?:number){super(message)} }
+const categoryTerms:Record<Category,string>={all:'',emulators:'emulator',ports:'game-port',homebrew:'homebrew'};
+export class ApiError extends Error { constructor(message:string, public status?:number, public retryAt?:number){super(message);this.name='ApiError'} }
+export class GitHubError extends ApiError { constructor(message:string,status?:number,retryAt?:number){super(message,status,retryAt);this.name='GitHubError'} }
+export function prioritizeStableReleases(releases:Release[]):Release[]{
+  return [...releases].sort((left,right)=>Number(left.prerelease)-Number(right.prerelease)||Date.parse(right.published_at||'')-Date.parse(left.published_at||''));
+}
 async function get<T>(path:string,signal?:AbortSignal):Promise<T>{
   const url=API+path; const hit=cache.get(url); if(hit&&hit.until>Date.now()) return hit.value as T;
   let response:Response;
@@ -26,7 +31,14 @@ export function searchRepos(query:string,category:Category,page:number,signal?:A
   return get<SearchPage>(`/search/repositories?${params}`,signal);
 }
 export function getRepo(fullName:string,signal?:AbortSignal){return get<Repo>(`/repos/${fullName}`,signal)}
-export async function getReleases(fullName:string,signal?:AbortSignal){try{return await get<Release[]>(`/repos/${fullName}/releases?per_page=10`,signal)}catch(e){if(e instanceof GitHubError&&e.status===404)return [];throw e}}
-export function validReleaseUrl(url:string){try{const u=new URL(url);return u.protocol==='https:'&&u.hostname==='github.com'&&u.pathname.includes('/releases/download/')}catch{return false}}
+export async function getReleases(fullName:string,signal?:AbortSignal){try{return prioritizeStableReleases(await get<Release[]>(`/repos/${fullName}/releases?per_page=10`,signal))}catch(e){if(e instanceof GitHubError&&e.status===404)return [];throw e}}
+export function validReleaseUrl(url:string,provider:ProviderId='github'){
+  try{
+    const u=new URL(url);
+    if(u.protocol!=='https:')return false;
+    if(provider==='github')return u.hostname==='github.com'&&u.pathname.includes('/releases/download/');
+    return u.hostname==='gitlab.com'&&/\/-\/releases\/[^/]+\/downloads\//.test(u.pathname);
+  }catch{return false}
+}
 export function formatDate(date:string){return new Intl.DateTimeFormat('pt-BR',{dateStyle:'medium'}).format(new Date(date))}
 export function formatSize(bytes:number){return bytes<1024*1024?`${(bytes/1024).toFixed(0)} KB`:`${(bytes/1024/1024).toFixed(1)} MB`}
