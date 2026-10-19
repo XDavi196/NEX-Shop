@@ -1,98 +1,71 @@
 <p align="center">
-  <img src="src-tauri/icons/app-icon.svg" width="112" alt="Logo da NEX Shop">
+  <img src="src-tauri/icons/app-icon.svg" width="112" alt="Logo original da NEX Shop">
 </p>
 
 <h1 align="center">NEX Shop</h1>
 
-<p align="center">Descubra projetos públicos e consulte releases oficiais do GitHub e GitLab.</p>
+<p align="center">Uma loja independente de homebrews, emuladores e ports para Windows e Android.</p>
 
-Loja independente para descobrir projetos de homebrew, emuladores e ports/recomps publicados em repositórios e releases públicos do GitHub e do GitLab. A consulta do catálogo público não exige conta nem token pessoal.
+A NEX Shop descobre projetos comunitários e consulta metadados e versões publicadas nas APIs oficiais do GitHub e do GitLab. Os dois estilos visuais — moderno e retrô — têm identidade própria da NEX e não representam um produto oficial da Nintendo.
 
-> **Prévia de desenvolvimento.** Esta versão permite pesquisar projetos, consultar informações e abrir as páginas oficiais de releases. Ainda não gerencia downloads nem instalações. Consulte as [limitações](#limitações-conhecidas) antes de usar.
+## Prévia da loja
 
-## Amostra da loja
+![Prévia da home da NEX Shop: navegação lateral, busca e cartões de projetos](docs/media/home-preview.svg)
 
-![Amostra visual ilustrativa da home da NEX Shop, com catálogo, categorias e projetos](docs/media/home-preview.svg)
+A imagem mostra uma amostra visual da home. A versão atual pesquisa repositórios e releases e abre as páginas oficiais dos projetos.
 
-A home reúne o catálogo inicial e atalhos para consultar as versões nas fontes oficiais. A imagem é uma amostra visual da interface; os dados apresentados no app são carregados do catálogo e das APIs públicas.
+## Baixar · v0.3.0
 
-## Release atual · v0.2.0
+[Instalador Windows](https://github.com/XDavi196/NEX-Shop/releases/download/v0.3.0/NEX-Shop-Setup.exe) · [APK Android de depuração](https://github.com/XDavi196/NEX-Shop/releases/download/v0.3.0/NEX-Shop-Android-debug.apk) · [Notas da versão](https://github.com/XDavi196/NEX-Shop/releases/tag/v0.3.0)
 
-[Baixar instalador Windows](https://github.com/XDavi196/NEX-Shop/releases/download/v0.2.0/NEX-Shop-Setup.exe) · [Baixar APK Android de depuração](https://github.com/XDavi196/NEX-Shop/releases/download/v0.2.0/NEX-Shop-Android-debug.apk) · [Ver notas e todos os arquivos](https://github.com/XDavi196/NEX-Shop/releases/tag/v0.2.0)
+Esta é uma versão de prévia: o instalador Windows não tem assinatura digital e o APK debug não está assinado para publicação na Play Store.
 
-Esta é uma prévia: o instalador Windows não tem assinatura digital e o APK é de depuração, sem assinatura para a Play Store.
+## O que já funciona
 
-## Recursos disponíveis
+- Pesquisa pública de projetos e releases no GitHub e GitLab, sem token pessoal.
+- Categorias iniciais: homebrews, emuladores e ports/recomps.
+- Catálogo inicial com projetos selecionados e opção de adicionar repositórios por URL.
+- Detalhes, versões, notas, status de pré-lançamento e links para as fontes oficiais.
+- Paginação, cache temporário e mensagens para erros de rede e limites de API.
+- Estilo moderno ou retrô, com cores independentes e preferência salva no dispositivo.
 
-- Pesquisa nas APIs REST públicas oficiais do GitHub e do GitLab.
-- Categorias de busca: homebrews, emuladores e ports/recomps.
-- Catálogo inicial com cinco emuladores conferidos nos repositórios oficiais em 19/10/2026.
-- Inclusão local de repositórios GitHub e GitLab por URL.
-- Pesquisa paginada, detalhes do projeto, licença declarada e atividade recente quando informadas pela API.
-- Consulta de até dez releases por projeto, notas, indicação de pré-lançamento e links oficiais.
-- Cache temporário em memória e mensagens para falhas de rede, projetos ausentes e limites de API.
-- Validação de links HTTPS e de caminhos de ativos hospedados na plataforma correspondente.
+## Limitações atuais
 
-## Limitações conhecidas
-
-- O catálogo inicial contém cinco emuladores; ainda não há uma seleção curada de homebrews e ports/recomps.
-- A busca por termos não valida automaticamente categoria, compatibilidade, licença, segurança ou prontidão do projeto.
-- Repositórios adicionados pelo usuário ficam no armazenamento local do navegador e não passam por curadoria da NEX.
-- Confira requisitos, licença e origem do projeto antes de baixar. A aplicação abre links oficiais no navegador; não faz o download do arquivo.
-- Para GitLab, ativos diretos são exibidos somente quando hospedados em `gitlab.com`; ativos externos não são tratados como downloads compatíveis.
-- Ainda não há download gerenciado, retomada/cancelamento, biblioteca instalada, instalação, atualização, reparo ou desinstalação.
-- Ainda não há catálogo editável validado, suporte a GitLab self-managed, SteamGridDB, ScreenScraper, preferências de temas/música ou instalação assistida de APK.
-- O aplicativo não instala arquivos em silêncio. Não considere um link ou ativo verificado como garantia de segurança.
-
-## Builds de prévia
-
-As releases de prévia podem conter instalador Windows NSIS e APK Android de depuração, conforme os builds aprovados da versão. O instalador Windows não é assinado digitalmente; o APK debug não está assinado para publicação na Play Store. Use somente artefatos anexados à página oficial de [releases](https://github.com/XDavi196/NEX-Shop/releases) e confira as notas de cada versão.
+- A pesquisa por termos não equivale a uma curadoria: confira compatibilidade, requisitos, licença e origem de cada projeto.
+- A seleção curada ainda é pequena; homebrews e ports precisam de validação editorial.
+- A NEX Shop abre as páginas oficiais. Ela ainda não gerencia downloads, instalação, atualização, reparo ou desinstalação.
+- O suporte a GitLab self-managed, SteamGridDB, ScreenScraper e música integrada ainda não está implementado.
+- Não distribuímos ROMs, BIOS nem arquivos proprietários. Alguns ports exigem que você forneça arquivos do jogo original.
 
 ## Desenvolvimento
 
-Requer Node.js 22 ou superior e pnpm 10 ou superior.
+Requer Node.js 22+ e pnpm 10+.
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm dev
-```
-
-Verificações disponíveis no projeto:
-
-```sh
 pnpm test
 pnpm build
 ```
 
-## Build Windows
-
-Requer Rust stable, Visual Studio C++ Build Tools e WebView2 Runtime.
+Para gerar o instalador Windows, instale Rust stable, Visual Studio C++ Build Tools e WebView2:
 
 ```sh
-pnpm install --frozen-lockfile
 pnpm tauri build --bundles nsis
 ```
 
-O instalador NSIS é gerado em `src-tauri/target/release/bundle/nsis/`.
-
-## Build Android
-
-Requer Android Studio/SDK (Platform 35 e Build Tools 35), JDK 21, Node.js e pnpm.
+Para gerar o APK Android, instale Android Studio/SDK e JDK 21:
 
 ```sh
-pnpm install --frozen-lockfile
 pnpm build
 pnpm exec cap add android
 pnpm exec cap sync android
 cd android
-./gradlew.bat assembleDebug
+gradlew.bat assembleDebug
 ```
 
-No PowerShell, execute `gradlew.bat assembleDebug`. O APK debug é gerado em `android/app/build/outputs/apk/debug/app-debug.apk`. A instalação de APK depende da confirmação e das configurações do Android.
+Builds de depuração não são builds da Play Store. A instalação de programas ou APKs sempre exige ação e confirmação do usuário.
 
-## Fontes de dados e privacidade
+## Projetos relacionados
 
-A NEX Shop consulta `https://api.github.com` e `https://gitlab.com/api/v4` sem credenciais. Não solicita senha nem token pessoal e não recebe mensagens ou dados de conta. Links de ativos são validados para HTTPS e para caminhos de release da plataforma correspondente.
-
-O NEX 2 Frontend é um projeto separado e funciona sem a NEX Shop. Consulte o [repositório](https://github.com/XDavi196/NEX-2-Frontend) para os recursos e limites próprios dele.
-
+A NEX Shop e o [NEX 2 Frontend](https://github.com/XDavi196/NEX-2-Frontend) são aplicativos independentes; nenhum deles exige o outro.
