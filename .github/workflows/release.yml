@@ -88,8 +88,8 @@ jobs:
       - name: Publish preview with verified builds
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.3.0
-          name: NEX Shop v0.3.0 — Prévia Windows e Android
+          tag_name: v0.4.0
+          name: NEX Shop v0.4.0 — Prévia Windows e Android
           target_commitish: ${{ github.sha }}
           prerelease: true
           generate_release_notes: true
@@ -107,3 +107,4 @@ jobs:
           files: |
             release-assets/windows-installer/NEX-Shop-Setup.exe
             release-assets/android-apk/NEX-Shop-Android-debug.apk
+

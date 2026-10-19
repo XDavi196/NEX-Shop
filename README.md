@@ -4,7 +4,7 @@
 
 <h1 align="center">NEX Shop</h1>
 
-<p align="center">Descubra projetos e releases públicos com uma interface NEX moderna ou retrô.</p>
+<p align="center">Explore projetos de comunidade em uma vitrine estilo console, com visual moderno ou retrô NEX.</p>
 
 Loja independente para descobrir projetos de homebrew, emuladores e ports/recomps publicados em repositórios e releases públicos do GitHub e do GitLab. A consulta do catálogo público não exige conta nem token pessoal.
 
@@ -14,11 +14,11 @@ Loja independente para descobrir projetos de homebrew, emuladores e ports/recomp
 
 ![Amostra visual ilustrativa da home da NEX Shop, com catálogo, categorias e projetos](docs/media/home-preview.svg)
 
-A home reúne o catálogo inicial e atalhos para consultar as versões nas fontes oficiais. A imagem é uma amostra visual da interface; os dados apresentados no app são carregados do catálogo e das APIs públicas.
+A home reúne o catálogo inicial e atalhos para consultar as versões nas fontes oficiais. A imagem é uma amostra visual da interface inspirada em lojas de console, com arte conceitual original da NEX; os dados apresentados no app são carregados do catálogo e das APIs públicas.
 
-## Release atual · v0.3.0
+## Release atual · v0.4.0
 
-[Baixar instalador Windows](https://github.com/XDavi196/NEX-Shop/releases/download/v0.3.0/NEX-Shop-Setup.exe) · [Baixar APK Android de depuração](https://github.com/XDavi196/NEX-Shop/releases/download/v0.3.0/NEX-Shop-Android-debug.apk) · [Ver notas e todos os arquivos](https://github.com/XDavi196/NEX-Shop/releases/tag/v0.3.0)
+[Baixar instalador Windows](https://github.com/XDavi196/NEX-Shop/releases/download/v0.4.0/NEX-Shop-Setup.exe) · [Baixar APK Android de depuração](https://github.com/XDavi196/NEX-Shop/releases/download/v0.4.0/NEX-Shop-Android-debug.apk) · [Ver notas e todos os arquivos](https://github.com/XDavi196/NEX-Shop/releases/tag/v0.4.0)
 
 Esta é uma prévia: o instalador Windows não tem assinatura digital e o APK é de depuração, sem assinatura para a Play Store.
 
@@ -32,7 +32,7 @@ Esta é uma prévia: o instalador Windows não tem assinatura digital e o APK é
 - Consulta de até dez releases por projeto, notas, indicação de pré-lançamento e links oficiais.
 - Cache temporário em memória e mensagens para falhas de rede, projetos ausentes e limites de API.
 - Validação de links HTTPS e de caminhos de ativos hospedados na plataforma correspondente.
-- Estilos moderno e retrô selecionáveis, com cores independentes e preferência guardada neste dispositivo. A direção visual é original e inspirada em consoles e lojas de jogos; não usa identidade oficial da Nintendo.
+- Vitrine estilo console com navegação lateral, cartões de capa conceituais originais e estilos moderno e retrô selecionáveis, com cores independentes e preferência guardada neste dispositivo. A direção visual é original e inspirada em consoles e lojas de jogos; não usa identidade oficial da Nintendo.
 
 ## Limitações conhecidas
 
@@ -96,3 +96,5 @@ No PowerShell, execute `gradlew.bat assembleDebug`. O APK debug é gerado em `an
 A NEX Shop consulta `https://api.github.com` e `https://gitlab.com/api/v4` sem credenciais. Não solicita senha nem token pessoal e não recebe mensagens ou dados de conta. Links de ativos são validados para HTTPS e para caminhos de release da plataforma correspondente.
 
 O NEX 2 Frontend é um projeto separado e funciona sem a NEX Shop. Consulte o [repositório](https://github.com/XDavi196/NEX-2-Frontend) para os recursos e limites próprios dele.
+
+

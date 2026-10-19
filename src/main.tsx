@@ -30,6 +30,7 @@ function App() {
     return DEFAULT_APPEARANCE;
   });
   const [view, setView] = useState<'catalog' | 'search'>('catalog');
+  const [activeNav, setActiveNav] = useState('highlights');
   const [manualUrl, setManualUrl] = useState('');
   const [manualCategory, setManualCategory] = useState<Category>('homebrew');
   const [manualError, setManualError] = useState('');
@@ -133,58 +134,64 @@ function App() {
     setManualError('');
   }
 
+  const catalogEntries = [...curatedCatalog, ...userEntries]
+    .filter(item => category === 'all' || item.category === category)
+    .filter(item => `${item.name} ${item.project} ${item.note}`.toLowerCase().includes(query.trim().toLowerCase()));
+
+  function navigate(id: string) {
+    setActiveNav(id);
+    setRepo(null);
+    setReleases([]);
+    if (id === 'search') { setView('search'); return; }
+    setView('catalog');
+    if (id === 'highlights') setCategory('all');
+    if (id === 'homebrew' || id === 'emulators' || id === 'ports') setCategory(id);
+  }
+
   return (
-    <main className="shell" data-shop-style={appearance.style} data-shop-color={appearance.color}>
-      <header>
-        <b>NEX <em>SHOP</em></b>
-        <div className="appearance-controls" aria-label="Aparência da loja">
-          <label>Estilo <select aria-label="Estilo da interface" value={appearance.style} onChange={event => setAppearance(current => ({ ...current, style: event.target.value as Appearance['style'] }))}><option value="modern">Moderno · referência Switch 2</option><option value="retro">Retrô · referência Wii U eShop</option></select></label>
-          <label>Cor <select aria-label="Cor da interface" value={appearance.color} onChange={event => setAppearance(current => ({ ...current, color: event.target.value as Appearance['color'] }))}><option value="default">Padrão do estilo</option><option value="black">Preto</option><option value="white">Branco</option><option value="red">Vermelho NEX</option></select></label>
+    <main className="console-shell" data-shop-style={appearance.style} data-shop-color={appearance.color}>
+      <aside className="console-sidebar">
+        <a className="brand" href="#home" onClick={event => { event.preventDefault(); navigate('highlights'); }} aria-label="NEX Shop, início"><span className="brand-mark">N</span><span>NEX <b>SHOP</b></span></a>
+        <div className="side-label">EXPLORAR</div>
+        <nav className="side-nav" aria-label="Navegação da loja">
+          <button className={activeNav === 'highlights' ? 'active' : ''} onClick={() => navigate('highlights')}><span>✦</span>Destaques</button>
+          <button className={activeNav === 'search' ? 'active' : ''} onClick={() => navigate('search')}><span>⌕</span>Buscar projetos</button>
+          <button className={activeNav === 'homebrew' ? 'active' : ''} onClick={() => navigate('homebrew')}><span>◈</span>Homebrews</button>
+          <button className={activeNav === 'emulators' ? 'active' : ''} onClick={() => navigate('emulators')}><span>▣</span>Emuladores</button>
+          <button className={activeNav === 'ports' ? 'active' : ''} onClick={() => navigate('ports')}><span>⌘</span>Ports e recomps</button>
+        </nav>
+        <div className="sidebar-spacer" />
+        <div className="side-label appearance-heading">APARÊNCIA</div>
+        <div className="sidebar-appearance">
+          <label>Interface<select aria-label="Estilo da interface" value={appearance.style} onChange={event => setAppearance(current => ({ ...current, style: event.target.value as Appearance['style'] }))}><option value="modern">Moderno · console atual</option><option value="retro">Retrô · eShop clássica</option></select></label>
+          <label>Cor<select aria-label="Cor da interface" value={appearance.color} onChange={event => setAppearance(current => ({ ...current, color: event.target.value as Appearance['color'] }))}><option value="default">Padrão do estilo</option><option value="black">Preto</option><option value="white">Branco</option><option value="red">Vermelho NEX</option></select></label>
         </div>
-        <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub oficial ↗</a>
-      </header>
+        <a className="side-footer" href="https://github.com/XDavi196/NEX-Shop" target="_blank" rel="noopener noreferrer">NEX Shop · fontes oficiais ↗</a>
+      </aside>
 
-      <h1>Projetos para <em>jogar e criar.</em></h1>
-      <p>Consulte projetos e releases públicos nas plataformas oficiais.</p>
-
-      <div className="view-switch" role="group" aria-label="Modo de navegação">
-        <button type="button" className={view === 'catalog' ? 'sel' : ''} aria-pressed={view === 'catalog'} onClick={() => { setView('catalog'); setRepo(null); }}>Catálogo</button>
-        <button type="button" className={view === 'search' ? 'sel' : ''} aria-pressed={view === 'search'} onClick={() => { setView('search'); setRepo(null); }}>Buscar em plataformas</button>
-      </div>
-
-      {view === 'catalog' && !repo && (
-        <>
-          <nav aria-label="Categorias do catálogo">
-            {categories.map(item => <button key={item.id} type="button" className={category === item.id ? 'sel' : ''} aria-pressed={category === item.id} onClick={() => setCategory(item.id)}>{item.name}</button>)}
-          </nav>
-          <input aria-label="Filtrar catálogo" value={query} onChange={event => setQuery(event.target.value)} placeholder="Filtrar projetos do catálogo…" />
-          <p className="catalog-disclaimer">Projetos selecionados manualmente. A data de verificação registra a conferência do repositório; confirme os detalhes da release no provedor.</p>
-          <section className="grid" aria-label="Projetos do catálogo">
-            {[...curatedCatalog, ...userEntries]
-              .filter(item => category === 'all' || item.category === category)
-              .filter(item => `${item.name} ${item.project} ${item.note}`.toLowerCase().includes(query.trim().toLowerCase()))
-              .map(item => (
-                <article key={item.id}>
-                  <small>{categories.find(entry => entry.id === item.category)?.name} · {item.provider === 'github' ? 'GitHub' : 'GitLab'} · Verificado {formatDate(item.verifiedAt)}</small>
-                  <h2>{item.name}</h2>
-                  <p>{item.note}</p>
-                  {item.targets.length > 0 && <p>Plataformas declaradas: {item.targets.join(', ')}</p>}
-                  <button type="button" onClick={() => { setView('search'); setProviderId(item.provider); void openProject(item.project, item.provider); }}>Ver versões oficiais</button>
-                  {' '}<a href={`https://${item.provider === 'github' ? 'github.com' : 'gitlab.com'}/${item.project}`} target="_blank" rel="noopener noreferrer">Repositório oficial ↗</a>
-                  {item.id.startsWith('github:') || item.id.startsWith('gitlab:') ? <button type="button" onClick={() => setUserEntries(current => current.filter(entry => entry.id !== item.id))}>Remover</button> : null}
+      <section className="storefront">
+        <header className="store-topbar">
+          <div className="breadcrumb"><span>NEX SHOP</span><i>/</i>{view === 'search' ? 'Buscar projetos' : categories.find(item => item.id === category)?.name}</div>
+          <div className="top-actions"><label className="top-search"><span>⌕</span><input aria-label="Pesquisar na loja" value={query} onChange={event => { setQuery(event.target.value); if (view === 'search') setPage(1); }} onFocus={() => { if (view !== 'search') navigate('search'); }} placeholder="Buscar projetos" /></label><div className="profile-chip">N</div></div>
+        </header>
+        <div className="store-content">
+          {view === 'catalog' && !repo && <>
+            <section className="welcome-row"><div><span className="eyebrow">A VITRINE NEX</span><h1>{category === 'all' ? <>Descubra seu próximo <em>projeto.</em></> : <>{categories.find(item => item.id === category)?.name} <em>em destaque.</em></>}</h1><p>Projetos da comunidade, com links para suas fontes e releases oficiais.</p></div><div className="catalog-count"><strong>{catalogEntries.length.toString().padStart(2, '0')}</strong><span>PROJETOS<br/>NA VITRINE</span></div></section>
+            <div className="shelf-heading"><div><span className="eyebrow">SELEÇÃO NEX</span><h2>{category === 'all' ? 'Em destaque' : categories.find(item => item.id === category)?.name}</h2></div><span className="shelf-meta">{catalogEntries.length} itens <b>·</b> fontes verificáveis</span></div>
+            <p className="catalog-disclaimer">Seleção inicial conferida manualmente. Confira versão, requisitos e compatibilidade na página oficial do projeto.</p>
+            <section className="grid store-grid" aria-label="Projetos do catálogo">
+              {catalogEntries.map((item, index) => (
+                <article className="store-card" key={item.id}>
+                  <button className={`cover-art cover-${index % 5}`} type="button" aria-label={`Ver releases de ${item.name}`} onClick={() => { setView('search'); setProviderId(item.provider); void openProject(item.project, item.provider); }}><span className="cover-orbit"/><span className="cover-kicker">NEX COMMUNITY · {item.category.toUpperCase()}</span><span className="cover-title">{item.name}</span><span className="cover-caption">{item.targets.join('  /  ') || 'PROJETO DA COMUNIDADE'}</span><span className="cover-open">↗</span></button>
+                  <div className="card-info"><div><h3>{item.name}</h3><small>{categories.find(entry => entry.id === item.category)?.name} <b>·</b> {item.provider === 'github' ? 'GitHub' : 'GitLab'}</small></div><button className="card-arrow" type="button" aria-label={`Ver versões de ${item.name}`} onClick={() => { setView('search'); setProviderId(item.provider); void openProject(item.project, item.provider); }}>↗</button></div>
+                  <p className="card-note">{item.note}</p>
+                  <div className="card-bottom"><span>{item.targets.join(' · ') || 'Plataforma não informada'}</span><a href={`https://${item.provider === 'github' ? 'github.com' : 'gitlab.com'}/${item.project}`} target="_blank" rel="noopener noreferrer">Repositório oficial</a></div>
                 </article>
               ))}
-          </section>
-          <section className="manual-entry" aria-labelledby="manual-entry-title">
-            <h2 id="manual-entry-title">Adicionar repositório</h2>
-            <p>Somente URLs oficiais HTTPS do GitHub ou GitLab.com. A NEX não valida a segurança do conteúdo.</p>
-            <label>URL do projeto <input value={manualUrl} onChange={event => setManualUrl(event.target.value)} placeholder="https://github.com/organizacao/projeto" /></label>
-            <label>Categoria <select value={manualCategory} onChange={event => setManualCategory(event.target.value as Category)}><option value="homebrew">Homebrew</option><option value="emulators">Emulador</option><option value="ports">Port ou recomp</option></select></label>
-            <button type="button" onClick={addManualProject}>Adicionar ao catálogo local</button>
-            {manualError && <p role="alert" className="error-text">{manualError}</p>}
-          </section>
-        </>
-      )}
+            </section>
+            {catalogEntries.length === 0 && <div className="empty-shelf"><b>Nenhum projeto nesta seleção ainda.</b><span>A vitrine é curada e vai crescer por etapas.</span></div>}
+            <section className="manual-entry" aria-labelledby="manual-entry-title"><div className="shelf-heading"><div><span className="eyebrow">TRAGA UM PROJETO</span><h2 id="manual-entry-title">Adicionar repositório</h2></div></div><p>Inclua uma URL oficial HTTPS do GitHub ou GitLab. O projeto fica salvo somente neste dispositivo.</p><div className="manual-form"><label>URL do projeto<input value={manualUrl} onChange={event => setManualUrl(event.target.value)} placeholder="https://github.com/organizacao/projeto" /></label><label>Categoria<select value={manualCategory} onChange={event => setManualCategory(event.target.value as Category)}><option value="homebrew">Homebrew</option><option value="emulators">Emulador</option><option value="ports">Port ou recomp</option></select></label><button type="button" onClick={addManualProject}>Adicionar à vitrine</button></div>{manualError && <p role="alert" className="error-text">{manualError}</p>}</section>
+          </>}
 
       {view === 'search' && <>
       <div className="provider-switch" role="group" aria-label="Fonte de projetos">
@@ -240,7 +247,7 @@ function App() {
 
       {repo ? (
         <section className="detail">
-          <button type="button" onClick={() => setRepo(null)}>← Voltar</button>
+          <button type="button" onClick={() => setRepo(null)}>← Voltar à busca</button>
           <h2>{repo.name}</h2>
           <a href={repo.html_url} target="_blank" rel="noopener noreferrer">Abrir projeto oficial ↗</a>
           <p>{repo.description || 'Sem descrição informada pelo projeto.'}</p>
@@ -302,6 +309,8 @@ function App() {
         </>
       )}
       </>}
+        </div>
+      </section>
     </main>
   );
 }
