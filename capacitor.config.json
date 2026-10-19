@@ -1,1 +1,5 @@
-{`n  "appId": "com.nex.shop",`n  "appName": "NEX Shop",`n  "webDir": "dist"`n}`n
+{
+  "appId": "com.nex.shop",
+  "appName": "NEX Shop",
+  "webDir": "dist"
+}
