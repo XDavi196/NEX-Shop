@@ -12,7 +12,23 @@ const categories: { id: Category; name: string }[] = [
   { id: 'ports', name: 'Ports e recomps' },
 ];
 
+type Appearance = { style: 'modern' | 'retro'; color: 'default' | 'black' | 'white' | 'red' };
+const DEFAULT_APPEARANCE: Appearance = { style: 'modern', color: 'default' };
+
 function App() {
+  const [appearance, setAppearance] = useState<Appearance>(() => {
+    try {
+      const saved: unknown = JSON.parse(localStorage.getItem('nex-shop-appearance') || 'null');
+      if (saved && typeof saved === 'object') {
+        const value = saved as Partial<Appearance>;
+        return {
+          style: value.style === 'retro' ? 'retro' : 'modern',
+          color: value.color === 'black' || value.color === 'white' || value.color === 'red' ? value.color : 'default',
+        };
+      }
+    } catch { /* Use the default appearance when storage is unavailable or invalid. */ }
+    return DEFAULT_APPEARANCE;
+  });
   const [view, setView] = useState<'catalog' | 'search'>('catalog');
   const [manualUrl, setManualUrl] = useState('');
   const [manualCategory, setManualCategory] = useState<Category>('homebrew');
@@ -35,6 +51,12 @@ function App() {
   const [error, setError] = useState<ApiError | null>(null);
   const [repo, setRepo] = useState<Repo | null>(null);
   const [releases, setReleases] = useState<Release[]>([]);
+
+  useEffect(() => {
+    document.documentElement.dataset.shopStyle = appearance.style;
+    document.documentElement.dataset.shopColor = appearance.color;
+    try { localStorage.setItem('nex-shop-appearance', JSON.stringify(appearance)); } catch { /* Appearance remains active for this session. */ }
+  }, [appearance]);
 
   useEffect(() => {
     if (view !== 'search') return;
@@ -112,9 +134,13 @@ function App() {
   }
 
   return (
-    <main className="shell">
+    <main className="shell" data-shop-style={appearance.style} data-shop-color={appearance.color}>
       <header>
         <b>NEX <em>SHOP</em></b>
+        <div className="appearance-controls" aria-label="Aparência da loja">
+          <label>Estilo <select aria-label="Estilo da interface" value={appearance.style} onChange={event => setAppearance(current => ({ ...current, style: event.target.value as Appearance['style'] }))}><option value="modern">Moderno · referência Switch 2</option><option value="retro">Retrô · referência Wii U eShop</option></select></label>
+          <label>Cor <select aria-label="Cor da interface" value={appearance.color} onChange={event => setAppearance(current => ({ ...current, color: event.target.value as Appearance['color'] }))}><option value="default">Padrão do estilo</option><option value="black">Preto</option><option value="white">Branco</option><option value="red">Vermelho NEX</option></select></label>
+        </div>
         <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub oficial ↗</a>
       </header>
 
