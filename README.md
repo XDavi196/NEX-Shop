@@ -16,6 +16,12 @@ Loja independente para descobrir projetos de homebrew, emuladores e ports/recomp
 
 A home reúne o catálogo inicial e atalhos para consultar as versões nas fontes oficiais. A imagem é uma amostra visual da interface; os dados apresentados no app são carregados do catálogo e das APIs públicas.
 
+## Release atual · v0.2.0
+
+[Baixar instalador Windows](https://github.com/XDavi196/NEX-Shop/releases/download/v0.2.0/NEX-Shop-Setup.exe) · [Baixar APK Android de depuração](https://github.com/XDavi196/NEX-Shop/releases/download/v0.2.0/NEX-Shop-Android-debug.apk) · [Ver notas e todos os arquivos](https://github.com/XDavi196/NEX-Shop/releases/tag/v0.2.0)
+
+Esta é uma prévia: o instalador Windows não tem assinatura digital e o APK é de depuração, sem assinatura para a Play Store.
+
 ## Recursos disponíveis
 
 - Pesquisa nas APIs REST públicas oficiais do GitHub e do GitLab.
