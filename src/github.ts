@@ -1,4 +1,4 @@
-export type Category = 'all'|'emulators'|'ports'|'homebrew'|'opensource'|'tools'|'launchers'|'android'|'windows';
+export type Category = 'all'|'emulators'|'ports'|'opensource'|'tools'|'launchers'|'android'|'windows'|'themes'|'media'|'audio'|'pins';
 export type Repo = { id:number; name:string; full_name:string; html_url:string; description:string|null; owner:{login:string;html_url:string}; language:string|null; stargazers_count:number; updated_at:string; default_branch:string; topics?:string[]; license?:{spdx_id:string|null;name:string;url:string|null}|null; forks_count:number; open_issues_count:number; created_at:string; homepage:string|null; archived:boolean; disabled:boolean; };
 export type ReleaseAsset = {name:string;size:number;browser_download_url:string;content_type:string;download_count:number};
 export type Release = {tag_name:string;name:string|null;html_url:string;published_at:string|null;body:string|null;draft:boolean;prerelease:boolean;assets:ReleaseAsset[]};
@@ -6,7 +6,7 @@ export type SearchPage = {items:Repo[];total_count:number;incomplete_results:boo
 const API='https://api.github.com';
 const cache = new Map<string,{until:number;value:unknown}>();
 const TTL=5*60_000;
-const categoryTerms:Record<Category,string>={all:'',emulators:'emulator',ports:'game-port',homebrew:'homebrew',opensource:'open-source game',tools:'game tools',launchers:'game launcher',android:'android',windows:'windows'};
+const categoryTerms:Record<Category,string>={all:'',emulators:'emulator',ports:'game-port',opensource:'open-source game',tools:'game tools',launchers:'game launcher',android:'android',windows:'windows',themes:'game launcher theme',media:'game cover art',audio:'game music soundtrack',pins:'game icon pack'};
 export class GitHubError extends Error { constructor(message:string, public status?:number, public retryAt?:number){super(message)} }
 async function get<T>(path:string,signal?:AbortSignal):Promise<T>{
   const url=API+path; const hit=cache.get(url); if(hit&&hit.until>Date.now()) return hit.value as T;
