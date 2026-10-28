@@ -28,14 +28,20 @@ Esta é uma versão de prévia: o instalador Windows não tem assinatura digital
 - Detalhes, versões, notas, status de pré-lançamento e links para as fontes oficiais.
 - Paginação, cache temporário e mensagens para erros de rede e limites de API.
 - Estilo moderno ou retrô, com cores independentes e preferência salva no dispositivo.
+- Interface inicial do catálogo de temas e contrato JSON v1, com validação de HTTPS, hash SHA-256 e pacote versionado; o índice começa vazio até haver temas aprovados.
 
 ## Limitações atuais
 
 - A pesquisa por termos não equivale a uma curadoria: confira compatibilidade, requisitos, licença e origem de cada projeto.
 - A seleção curada ainda é pequena; homebrews e ports precisam de validação editorial.
-- A NEX Shop abre as páginas oficiais. Ela ainda não gerencia downloads, instalação, atualização, reparo ou desinstalação.
+- A NEX Shop abre as páginas oficiais dos projetos. A instalação de temas ainda não está conectada ao ZNeko e o catálogo de temas não contém pacotes publicados.
+- Ainda não existe fluxo de envio, autenticação ou moderação de temas; o JSON público é somente de leitura. A compatibilidade dos pacotes com o ZNeko precisa ser validada antes de publicar temas.
 - O suporte a GitLab self-managed, SteamGridDB, ScreenScraper e música integrada ainda não está implementado.
 - Não distribuímos ROMs, BIOS nem arquivos proprietários. Alguns ports exigem que você forneça arquivos do jogo original.
+
+## Catálogo de temas
+
+A interface inicial usa um catálogo JSON público e versionado, planejado como fonte da futura integração com o ZNeko Launcher. O contrato, as categorias, os requisitos de pacote e o exemplo de entrada estão em [docs/theme-catalog.md](docs/theme-catalog.md). O endpoint estático e o JSON Schema ficam em `public/catalog/themes/v1/`. Não adicione temas sem verificar direitos, arquivos, hash e compatibilidade real.
 
 ## Desenvolvimento
 
