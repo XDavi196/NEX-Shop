@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   filterThemes,
   getThemeCatalog,
+  NEX_SHOP_THEME_CATALOG_URL,
   ThemeCatalogError,
   validateThemeCatalog,
   type ThemeItem,
@@ -75,6 +76,21 @@ describe('NEX Shop theme catalog', () => {
     expect(filterThemes([validTheme], 'neon', 'all')).toHaveLength(1);
     expect(filterThemes([validTheme], '', 'smart-folder-art')).toHaveLength(1);
     expect(filterThemes([validTheme], '', 'sound-packs')).toHaveLength(0);
+  });
+
+  it('loads the public NEX Shop endpoint and validates its response', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify(validDocument()), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+    const catalog = await getThemeCatalog();
+    expect(catalog.items[0].id).toBe('neon-folders');
+    expect(fetchMock.mock.calls[0][0]).toBe(NEX_SHOP_THEME_CATALOG_URL);
+  });
+
+  it('rejects an insecure catalog URL', async () => {
+    await expect(getThemeCatalog(undefined, 'http://example.com/catalog.json')).rejects.toThrow(/HTTPS/);
   });
 
   it('handles network errors without exposing internal fetch details', async () => {
