@@ -1,4 +1,9 @@
 export const NEX_SHOP_THEME_CATALOG_URL = 'https://raw.githubusercontent.com/XDavi196/NEX-Shop/main/public/catalog/themes/v1/index.json';
+export const LOCAL_THEME_CATALOG_PATH = '/catalog/themes/v1/index.json';
+
+const THEME_CATALOG_CACHE_TTL_MS = 5 * 60_000;
+const THEME_CATALOG_TIMEOUT_MS = 12_000;
+const themeCatalogCache = new Map<string, { expiresAt: number; value: ThemeCatalogDocument }>();
 
 export const THEME_CATEGORIES = [
   'smart-folder-art',
@@ -120,21 +125,36 @@ export function validateThemeCatalog(value: unknown): ThemeCatalogDocument {
 
 export async function getThemeCatalog(
   signal?: AbortSignal,
-  catalogUrl = NEX_SHOP_THEME_CATALOG_URL,
+  catalogUrl = LOCAL_THEME_CATALOG_PATH,
 ): Promise<ThemeCatalogDocument> {
-  if (!isHttpsUrl(catalogUrl)) {
+  if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+  if (catalogUrl !== LOCAL_THEME_CATALOG_PATH && !isHttpsUrl(catalogUrl)) {
     throw new ThemeCatalogError('A URL do catálogo precisa usar HTTPS.');
   }
+
+  const cached = themeCatalogCache.get(catalogUrl);
+  if (cached && cached.expiresAt > Date.now()) return cached.value;
+
+  const requestController = new AbortController();
+  const forwardAbort = () => requestController.abort();
+  signal?.addEventListener('abort', forwardAbort, { once: true });
+  const timeoutId = setTimeout(() => requestController.abort(), THEME_CATALOG_TIMEOUT_MS);
 
   let response: Response;
   try {
     response = await fetch(catalogUrl, {
-      signal,
+      signal: requestController.signal,
       headers: { Accept: 'application/json' },
     });
   } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') throw error;
+    if (signal?.aborted) throw error;
+    if (requestController.signal.aborted) {
+      throw new ThemeCatalogError('A consulta ao catálogo de temas excedeu o tempo limite de 12 segundos.');
+    }
     throw new ThemeCatalogError('Não foi possível conectar ao catálogo de temas da NEX Shop.');
+  } finally {
+    clearTimeout(timeoutId);
+    signal?.removeEventListener('abort', forwardAbort);
   }
 
   if (!response.ok) {
@@ -148,7 +168,12 @@ export async function getThemeCatalog(
     throw new ThemeCatalogError('O catálogo de temas retornou JSON inválido.');
   }
 
-  return validateThemeCatalog(data);
+  const catalog = validateThemeCatalog(data);
+  themeCatalogCache.set(catalogUrl, {
+    value: catalog,
+    expiresAt: Date.now() + THEME_CATALOG_CACHE_TTL_MS,
+  });
+  return catalog;
 }
 
 export function filterThemes(
