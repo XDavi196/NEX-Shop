@@ -84,7 +84,7 @@ describe('NEX Shop theme catalog', () => {
       headers: { 'Content-Type': 'application/json' },
     }));
     vi.stubGlobal('fetch', fetchMock);
-    const catalog = await getThemeCatalog();
+    const catalog = await getThemeCatalog(undefined, NEX_SHOP_THEME_CATALOG_URL);
     expect(catalog.items[0].id).toBe('neon-folders');
     expect(fetchMock.mock.calls[0][0]).toBe(NEX_SHOP_THEME_CATALOG_URL);
   });
