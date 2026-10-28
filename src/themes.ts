@@ -1,3 +1,5 @@
+export const NEX_SHOP_THEME_CATALOG_URL = 'https://raw.githubusercontent.com/XDavi196/NEX-Shop/main/public/catalog/themes/v1/index.json';
+
 export const THEME_CATEGORIES = [
   'smart-folder-art',
   'icons',
@@ -116,10 +118,17 @@ export function validateThemeCatalog(value: unknown): ThemeCatalogDocument {
   return value as unknown as ThemeCatalogDocument;
 }
 
-export async function getThemeCatalog(signal?: AbortSignal): Promise<ThemeCatalogDocument> {
+export async function getThemeCatalog(
+  signal?: AbortSignal,
+  catalogUrl = NEX_SHOP_THEME_CATALOG_URL,
+): Promise<ThemeCatalogDocument> {
+  if (!isHttpsUrl(catalogUrl)) {
+    throw new ThemeCatalogError('A URL do catálogo precisa usar HTTPS.');
+  }
+
   let response: Response;
   try {
-    response = await fetch('/catalog/themes/v1/index.json', {
+    response = await fetch(catalogUrl, {
       signal,
       headers: { Accept: 'application/json' },
     });
